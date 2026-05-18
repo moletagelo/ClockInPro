@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     
     timeout-minutes: 20
     
@@ -20,32 +20,18 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
+        cache: 'gradle'
     
     - name: Setup Android SDK
-      run: |
-        mkdir -p $HOME/android-sdk/cmdline-tools
-        cd $HOME/android-sdk/cmdline-tools
-        curl -sLO https://dl.google.com/android/repository/commandlinetools-mac-11076708_latest.zip
-        unzip -q commandlinetools-mac-11076708_latest.zip
-        mv cmdline-tools latest
-        rm commandlinetools-mac-11076708_latest.zip
-        export ANDROID_HOME=$HOME/android-sdk
-        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
-        yes | sdkmanager --licenses > /dev/null 2>&1 || true
-        sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
-        echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
-        echo "PATH=$HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools:$PATH" >> $GITHUB_ENV
+      uses: android-actions/setup-android@v2
     
     - name: Build Debug APK
       run: |
         chmod +x gradlew
-        ./gradlew assembleDebug --no-daemon
+        ./gradlew assembleDebug --no-daemon --warning-mode all
     
-    - name: List APK files
-      run: find app/build -name "*.apk" -type f
-    
-    - name: Upload APK directory
+    - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: ClockInPro-v1.1-debug
+        name: ClockInPro-v1.1
         path: app/build/outputs/apk/debug/
