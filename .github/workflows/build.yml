@@ -27,33 +27,28 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Check Gradle version
-      run: ./gradlew --version
-
     - name: Build Debug APK
-      run: |
-        echo "=== Starting Build ==="
-        ./gradlew assembleDebug --no-daemon --info 2>&1 | tee build.log
-        echo "=== Build finished ==="
+      run: ./gradlew assembleDebug --no-daemon
 
-    - name: Show build log
-      if: failure()
-      run: |
-        echo "=== Build Log (last 200 lines) ==="
-        tail -200 build.log
+    - name: Find APK files
+      run: find app/build -name "*.apk" -type f
+
+    - name: List APK directory
+      run: ls -la app/build/outputs/apk/ 2>/dev/null || echo "APK output directory not found"
 
     - name: Upload Debug APK
       if: success()
       uses: actions/upload-artifact@v4
       with:
         name: debug-apk
-        path: app/build/outputs/apk/debug/*.apk
+        path: '**/*.apk'
         retention-days: 5
 
-    - name: Upload build log
-      if: failure()
-      uses: actions/upload-artifact@v4
+    - name: Create Release
+      if: github.event_name == 'release'
+      uses: softprops/action-gh-release@v1
       with:
-        name: build-log
-        path: build.log
-        retention-days: 1
+        files: '**/*.apk'
+        body: "ClockInPro v${{ github.event.release.tag_name }}"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
