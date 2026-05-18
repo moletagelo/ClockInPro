@@ -22,7 +22,8 @@ jobs:
     - name: Build
       run: |
         chmod +x gradlew
-        ./gradlew assembleDebug --no-daemon
+        ./gradlew clean assembleDebug --no-daemon --stacktrace 2>&1 | tail -100
+        ls -la app/build/outputs/apk/debug/
     
     - uses: actions/upload-artifact@v4
       if: success()
