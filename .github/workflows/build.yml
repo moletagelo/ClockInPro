@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     
     timeout-minutes: 20
     
@@ -20,23 +20,26 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
+        cache: 'gradle'
     
-    - name: Setup Android SDK
+    - name: Install Android SDK
       run: |
+        sudo apt-get update
+        sudo apt-get install -y wget unzip
         mkdir -p $HOME/android-sdk/cmdline-tools
         cd $HOME/android-sdk/cmdline-tools
-        curl -sLO https://dl.google.com/android/repository/commandlinetools-mac-11076708_latest.zip
-        unzip -q commandlinetools-mac-11076708_latest.zip
+        wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+        unzip -q commandlinetools-linux-11076708_latest.zip
         mv cmdline-tools latest
-        rm commandlinetools-mac-11076708_latest.zip
+        rm commandlinetools-linux-11076708_latest.zip
         export ANDROID_HOME=$HOME/android-sdk
         export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
         yes | sdkmanager --licenses > /dev/null 2>&1 || true
         sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
-        echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
-        echo "PATH=$HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools:$PATH" >> $GITHUB_ENV
     
     - name: Build Debug APK
+      env:
+        ANDROID_HOME: ${{ env.HOME }}/android-sdk
       run: |
         chmod +x gradlew
         ./gradlew assembleDebug --no-daemon
