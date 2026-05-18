@@ -9,24 +9,26 @@ jobs:
   build:
     runs-on: ubuntu-latest
     
-    steps:
-    - uses: actions/checkout@v4
+    timeout-minutes: 15
     
-    - uses: actions/setup-java@v4
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Java JDK
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
     
-    - uses: android-actions/setup-android@v2
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v2
     
-    - name: Build APK
-      run: |
-        chmod +x gradlew
-        ./gradlew assembleDebug --no-daemon
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
     
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      if: always()
+    - name: Build Debug APK
+      uses: gradle/gradle-build-action@v2
       with:
-        name: ClockInPro-v1.1
-        path: app/build/outputs/apk/debug/
+        arguments: assembleDebug --no-daemon
+        build-root-directory: .
