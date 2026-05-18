@@ -39,9 +39,20 @@ jobs:
       run: chmod +x gradlew
 
     - name: Build Debug APK
-      run: ./gradlew assembleDebug --no-daemon --warning-mode all
+      run: |
+        ./gradlew assembleDebug --no-daemon 2>&1 | tee build_output.txt
+        echo "===BUILD EXIT CODE: $?===" >> build_output.txt
+
+    - name: Upload build output
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-output
+        path: build_output.txt
+        retention-days: 1
+      if: always()
 
     - name: Check APK output
+      if: success()
       run: |
         echo "=== APK Output ==="
         find app/build -name "*.apk" -type f -exec ls -lh {} \;
@@ -52,3 +63,4 @@ jobs:
         name: ClockInPro-debug
         path: '**/*.apk'
         retention-days: 7
+      if: success()
