@@ -26,7 +26,13 @@ jobs:
     - name: Build Debug APK
       run: |
         chmod +x gradlew
-        ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 || true
+        ./gradlew assembleDebug --no-daemon
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: ClockInPro-v1.1-debug
+        path: app/build/outputs/apk/debug/app-debug.apk
 
     - name: Check build output
       run: |
@@ -34,7 +40,6 @@ jobs:
           echo "APK built successfully!"
           ls -lh app/build/outputs/apk/debug/app-debug.apk
         else
-          echo "APK not found. Listing build directory:"
-          ls -la app/build/ 2>/dev/null || echo "Build directory does not exist"
-          ls -la app/build/outputs/ 2>/dev/null || echo "Outputs directory does not exist"
+          echo "APK not found"
+          exit 1
         fi
