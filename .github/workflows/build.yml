@@ -8,30 +8,40 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
-    timeout-minutes: 20
-    
+    timeout-minutes: 30
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    
+
     - name: Setup Java JDK
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: 'gradle'
-    
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v2
-    
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+      with:
+        gradle-version: 8.10
+
+    - name: Create local.properties
+      run: |
+        echo "sdk.dir=$ANDROID_HOME" > local.properties
+
     - name: Build Debug APK
       run: |
-        chmod +x gradlew
-        ./gradlew assembleDebug --no-daemon --warning-mode all
-    
+        ./gradlew assembleDebug --no-daemon --stacktrace
+
     - name: Upload APK
       uses: actions/upload-artifact@v4
+      if: success()
       with:
-        name: ClockInPro-v1.1
-        path: app/build/outputs/apk/debug/
+        name: ClockInPro-v1.1-debug
+        path: app/build/outputs/apk/debug/app-debug.apk
+
+    - name: Show build output
+      if: always()
+      run: |
+        echo "Build output directory:"
+        ls -la app/build/outputs/apk/debug/ 2>/dev/null || echo "No APK found"
