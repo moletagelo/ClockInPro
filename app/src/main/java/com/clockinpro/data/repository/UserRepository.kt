@@ -49,5 +49,25 @@ class UserRepository @Inject constructor(
 
     fun isLoggedIn(): Flow<Boolean> = preferencesManager.isLoggedIn
 
+    fun isGuest(): Flow<Boolean> = preferencesManager.isGuest
+
     fun getCurrentUserId(): Flow<Long?> = preferencesManager.currentUserId
+
+    suspend fun enterGuestMode() {
+        val guestUser = User(
+            phone = "guest",
+            passwordHash = "",
+            nickname = "游客",
+            avatarUrl = null,
+            createdAt = System.currentTimeMillis(),
+            updatedAt = System.currentTimeMillis()
+        )
+        val userId = insertUser(guestUser)
+        preferencesManager.setGuestMode(true)
+        preferencesManager.setCurrentUserId(userId)
+    }
+
+    suspend fun exitGuestMode() {
+        preferencesManager.clearSession()
+    }
 }

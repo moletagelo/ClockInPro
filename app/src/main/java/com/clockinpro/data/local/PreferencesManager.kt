@@ -22,6 +22,10 @@ class PreferencesManager @Inject constructor(
         preferences[KEY_IS_LOGGED_IN] ?: false
     }
 
+    val isGuest: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[KEY_IS_GUEST] ?: false
+    }
+
     val currentUserId: Flow<Long?> = dataStore.data.map { preferences ->
         preferences[KEY_USER_ID]
     }
@@ -62,16 +66,27 @@ class PreferencesManager @Inject constructor(
         }
     }
 
+    suspend fun setGuestMode(isGuest: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[KEY_IS_GUEST] = isGuest
+            if (isGuest) {
+                preferences[KEY_IS_LOGGED_IN] = true
+            }
+        }
+    }
+
     suspend fun clearSession() {
         dataStore.edit { preferences ->
             preferences.remove(KEY_IS_LOGGED_IN)
             preferences.remove(KEY_USER_ID)
+            preferences.remove(KEY_IS_GUEST)
         }
     }
 
     companion object {
         private val KEY_IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
         private val KEY_USER_ID = longPreferencesKey("user_id")
+        private val KEY_IS_GUEST = booleanPreferencesKey("is_guest")
         private val KEY_DARK_MODE = booleanPreferencesKey("dark_mode")
         private val KEY_LAST_SYNC_TIME = longPreferencesKey("last_sync_time")
     }
