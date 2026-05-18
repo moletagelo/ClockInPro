@@ -27,5 +27,33 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Build with Gradle wrapper
-      run: ./gradlew assembleDebug --no-daemon --stacktrace
+    - name: Check Gradle version
+      run: ./gradlew --version
+
+    - name: Build Debug APK
+      run: |
+        echo "=== Starting Build ==="
+        ./gradlew assembleDebug --no-daemon --info 2>&1 | tee build.log
+        echo "=== Build finished ==="
+
+    - name: Show build log
+      if: failure()
+      run: |
+        echo "=== Build Log (last 200 lines) ==="
+        tail -200 build.log
+
+    - name: Upload Debug APK
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: debug-apk
+        path: app/build/outputs/apk/debug/*.apk
+        retention-days: 5
+
+    - name: Upload build log
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-log
+        path: build.log
+        retention-days: 1
