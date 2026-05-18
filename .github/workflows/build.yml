@@ -7,9 +7,9 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     
-    timeout-minutes: 15
+    timeout-minutes: 20
     
     steps:
     - name: Checkout code
@@ -22,7 +22,19 @@ jobs:
         distribution: 'temurin'
     
     - name: Setup Android SDK
-      uses: android-actions/setup-android@v2
+      run: |
+        mkdir -p $HOME/android-sdk/cmdline-tools
+        cd $HOME/android-sdk/cmdline-tools
+        curl -sLO https://dl.google.com/android/repository/commandlinetools-mac-11076708_latest.zip
+        unzip -q commandlinetools-mac-11076708_latest.zip
+        mv cmdline-tools latest
+        rm commandlinetools-mac-11076708_latest.zip
+        export ANDROID_HOME=$HOME/android-sdk
+        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+        yes | sdkmanager --licenses > /dev/null 2>&1 || true
+        sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+        echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+        echo "PATH=$HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools:$PATH" >> $GITHUB_ENV
     
     - name: Build Debug APK
       run: |
