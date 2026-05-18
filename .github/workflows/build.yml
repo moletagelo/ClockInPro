@@ -12,22 +12,40 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - uses: gradle/gradle-build-action@v2
-      with:
-        gradle-version: 8.7
-    
     - uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
+        cache: 'gradle'
     
     - uses: android-actions/setup-android@v2
     
-    - name: Build
-      run: ./gradlew assembleDebug --no-daemon
-    
-    - uses: actions/upload-artifact@v4
-      if: success()
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
       with:
-        name: ClockInPro-v1.1
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+    
+    - name: Build
+      run: |
+        chmod +x gradlew
+        ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
+        echo "BUILD_RESULT=$?" >> $GITHUB_ENV
+    
+    - name: Check APK
+      if: success()
+      run: |
+        echo "Checking APK..."
+        ls -lh app/build/outputs/apk/debug/
+        test -f app/build/outputs/apk/debug/app-debug.apk && echo "APK exists!"
+    
+    - name: Upload APK
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ClockInPro-v1.1-${{ github.sha }}
         path: app/build/outputs/apk/debug/app-debug.apk
