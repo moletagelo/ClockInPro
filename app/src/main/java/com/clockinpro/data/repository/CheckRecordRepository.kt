@@ -2,7 +2,6 @@ package com.clockinpro.data.repository
 
 import com.clockinpro.data.local.*
 import com.clockinpro.domain.model.CheckRecord
-import com.clockinpro.domain.model.CheckType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.util.*

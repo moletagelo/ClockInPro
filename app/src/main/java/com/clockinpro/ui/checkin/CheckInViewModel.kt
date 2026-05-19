@@ -15,12 +15,12 @@ import com.clockinpro.domain.model.CheckRecord
 import com.clockinpro.domain.model.CheckType
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.Task
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.util.Locale
 import javax.inject.Inject
@@ -85,7 +85,10 @@ class CheckInViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isGettingLocation = true)
 
             try {
-                val location = fusedLocationClient.lastLocation.await()
+                val locationTask: Task<Location> = fusedLocationClient.lastLocation
+                val location = withContext(Dispatchers.IO) {
+                    locationTask.awaitWithTimeout()
+                }
                 if (location != null) {
                     val address = getAddressFromLocation(location)
                     _uiState.value = _uiState.value.copy(
@@ -114,6 +117,30 @@ class CheckInViewModel @Inject constructor(
         }
     }
 
+    private suspend fun <T> Task<T>.awaitWithTimeout(): T? {
+        return withContext(Dispatchers.IO) {
+            var result: T? = null
+            var completed = false
+
+            addOnSuccessListener { taskResult ->
+                result = taskResult
+                completed = true
+            }
+
+            addOnFailureListener {
+                completed = true
+            }
+
+            // 简单的等待逻辑
+            var tries = 0
+            while (!completed && tries < 100) {
+                kotlinx.coroutines.delay(100)
+                tries++
+            }
+            result
+        }
+    }
+
     private suspend fun getAddressFromLocation(location: Location): String? {
         return withContext(Dispatchers.IO) {
             try {
@@ -135,6 +162,8 @@ class CheckInViewModel @Inject constructor(
                             }
                         }
                     }
+                    // 等待结果返回（简单实现）
+                    kotlinx.coroutines.delay(500)
                     result
                 } else {
                     @Suppress("DEPRECATION")

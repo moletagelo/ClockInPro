@@ -63,7 +63,7 @@ fun RegisterScreen(
                 value = uiState.verificationCode,
                 onValueChange = viewModel::updateVerificationCode,
                 label = "验证码",
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                keyboardType = KeyboardType.Number
             )
 
             Spacer(modifier = Modifier.height(16.dp))

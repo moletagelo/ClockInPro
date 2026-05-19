@@ -58,7 +58,7 @@ class UserRepository @Inject constructor(
             phone = "guest",
             passwordHash = "",
             nickname = "游客",
-            avatarUrl = null,
+            avatarUrl = "",
             createdAt = System.currentTimeMillis(),
             updatedAt = System.currentTimeMillis()
         )
