@@ -1,4 +1,4 @@
-name: Build APK
+name: Build and Release APK
 
 on:
   push:
@@ -28,18 +28,37 @@ jobs:
         chmod +x gradlew
         ./gradlew assembleDebug --no-daemon
 
-    - name: Check build output
-      run: |
-        if [ -f app/build/outputs/apk/debug/app-debug.apk ]; then
-          echo "APK built successfully!"
-          ls -lh app/build/outputs/apk/debug/app-debug.apk
-        else
-          echo "APK not found"
-          exit 1
-        fi
-
-    - name: Upload APK
+    - name: Upload APK to Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: ClockInPro-v1.1-debug
         path: app/build/outputs/apk/debug/app-debug.apk
+
+    - name: Delete existing release if exists
+      uses: dev-drprasad/delete-tag-and-release@v1.0
+      continue-on-error: true
+      with:
+        tag_name: v1.1.0
+        delete_release: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: app/build/outputs/apk/debug/app-debug.apk
+        tag_name: v1.1.0
+        name: ClockInPro v1.1.0
+        body: |
+          # ClockInPro v1.1.0 - 游客模式
+
+          ## 🎉 新功能
+          - ✨ 添加游客模式，无需注册/登录即可使用全部功能
+          - 🎯 更新版本号为 1.1.0
+
+          ## 📦 下载
+          点击下方的 `app-debug.apk` 下载最新版本
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
