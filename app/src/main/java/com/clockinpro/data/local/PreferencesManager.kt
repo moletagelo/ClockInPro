@@ -34,6 +34,10 @@ class PreferencesManager @Inject constructor(
         preferences[KEY_DARK_MODE] ?: false
     }
 
+    val hasCompletedOnboarding: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[KEY_HAS_COMPLETED_ONBOARDING] ?: false
+    }
+
     val lastSyncTime: Flow<Long> = dataStore.data.map { preferences ->
         preferences[KEY_LAST_SYNC_TIME] ?: 0L
     }
@@ -57,6 +61,12 @@ class PreferencesManager @Inject constructor(
     suspend fun setDarkMode(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[KEY_DARK_MODE] = enabled
+        }
+    }
+
+    suspend fun setOnboardingCompleted(completed: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[KEY_HAS_COMPLETED_ONBOARDING] = completed
         }
     }
 
@@ -89,5 +99,6 @@ class PreferencesManager @Inject constructor(
         private val KEY_IS_GUEST = booleanPreferencesKey("is_guest")
         private val KEY_DARK_MODE = booleanPreferencesKey("dark_mode")
         private val KEY_LAST_SYNC_TIME = longPreferencesKey("last_sync_time")
+        private val KEY_HAS_COMPLETED_ONBOARDING = booleanPreferencesKey("has_completed_onboarding")
     }
 }

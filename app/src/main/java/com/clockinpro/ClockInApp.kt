@@ -18,10 +18,10 @@ class ClockInApp : Application() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 REMINDER_CHANNEL_ID,
-                "打卡提醒",
+                "Target reminders",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = "每日打卡提醒通知"
+                description = "Daily reminder notifications for your targets"
                 enableVibration(true)
             }
 

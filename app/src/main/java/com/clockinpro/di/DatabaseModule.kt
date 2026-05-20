@@ -6,6 +6,8 @@ import com.clockinpro.data.local.AppDatabase
 import com.clockinpro.data.local.CheckRecordDao
 import com.clockinpro.data.local.ReminderDao
 import com.clockinpro.data.local.UserDao
+import com.clockinpro.v2.data.local.CompletionDao
+import com.clockinpro.v2.data.local.TargetDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,7 +26,8 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "clockin_database"
-        ).build()
+        ).fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides
@@ -40,5 +43,15 @@ object DatabaseModule {
     @Provides
     fun provideReminderDao(database: AppDatabase): ReminderDao {
         return database.reminderDao()
+    }
+
+    @Provides
+    fun provideTargetDao(database: AppDatabase): TargetDao {
+        return database.targetDao()
+    }
+
+    @Provides
+    fun provideCompletionDao(database: AppDatabase): CompletionDao {
+        return database.completionDao()
     }
 }

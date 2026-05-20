@@ -12,7 +12,10 @@ import com.clockinpro.ui.MainActivity
 class ReminderReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val targetId = intent.getLongExtra(EXTRA_TARGET_ID, NOTIFICATION_ID.toLong())
+        val targetName = intent.getStringExtra(EXTRA_TARGET_NAME) ?: "your target"
 
         val activityIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -20,24 +23,26 @@ class ReminderReceiver : BroadcastReceiver() {
 
         val pendingIntent = PendingIntent.getActivity(
             context,
-            0,
+            targetId.hashCode(),
             activityIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val notification = NotificationCompat.Builder(context, ClockInApp.REMINDER_CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_popup_reminder)
-            .setContentTitle("打卡提醒")
-            .setContentText("该打卡了，记得签到哦！")
+            .setContentTitle("Time to check in")
+            .setContentText("Keep your momentum going for $targetName.")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .build()
 
-        notificationManager.notify(NOTIFICATION_ID, notification)
+        notificationManager.notify(targetId.hashCode(), notification)
     }
 
     companion object {
         const val NOTIFICATION_ID = 1001
+        const val EXTRA_TARGET_ID = "extra_target_id"
+        const val EXTRA_TARGET_NAME = "extra_target_name"
     }
 }

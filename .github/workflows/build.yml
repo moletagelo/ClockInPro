@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: write
-  packages: write
 
 jobs:
   build:
@@ -15,54 +14,63 @@ jobs:
     timeout-minutes: 30
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Java JDK
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
 
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v2
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
 
-    - name: Build Debug APK
-      run: |
-        chmod +x gradlew
-        ./gradlew assembleDebug --no-daemon
+      - name: Read app version
+        run: |
+          VERSION_NAME=$(grep -m1 'versionName "' app/build.gradle | sed -E 's/.*versionName "([^"]+)".*/\1/')
+          VERSION_CODE=$(grep -m1 'versionCode ' app/build.gradle | sed -E 's/.*versionCode ([0-9]+).*/\1/')
+          echo "VERSION_NAME=$VERSION_NAME" >> "$GITHUB_ENV"
+          echo "VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
+          echo "RELEASE_TAG=v$VERSION_NAME" >> "$GITHUB_ENV"
 
-    - name: Upload APK to Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: ClockInPro-v1.1-debug
-        path: app/build/outputs/apk/debug/app-debug.apk
+      - name: Build Debug APK
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
 
-    - name: Delete existing release if exists
-      uses: dev-drprasad/delete-tag-and-release@v1.0
-      continue-on-error: true
-      with:
-        tag_name: v1.1.0
-        delete_release: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload APK to Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ClockInPro-v${{ env.VERSION_NAME }}-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
 
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: app/build/outputs/apk/debug/app-debug.apk
-        tag_name: v1.1.0
-        name: ClockInPro v1.1.0
-        body: |
-          # ClockInPro v1.1.0 - 游客模式
+      - name: Delete existing release if exists
+        uses: dev-drprasad/delete-tag-and-release@v1.0
+        continue-on-error: true
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          delete_release: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-          ## 🎉 新功能
-          - ✨ 添加游客模式，无需注册/登录即可使用全部功能
-          - 🎯 更新版本号为 1.1.0
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: app/build/outputs/apk/debug/app-debug.apk
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: ClockInPro v${{ env.VERSION_NAME }}
+          body: |
+            # ClockInPro v${{ env.VERSION_NAME }}
 
-          ## 📦 下载
-          点击下方的 `app-debug.apk` 下载最新版本
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            Automated release from the `main` branch.
+
+            - Version name: `${{ env.VERSION_NAME }}`
+            - Version code: `${{ env.VERSION_CODE }}`
+            - Commit: `${{ github.sha }}`
+            - APK: `app-debug.apk`
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
