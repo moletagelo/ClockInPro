@@ -1,5 +1,6 @@
 package com.clockinpro.v2.ui.settings
 
+import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -31,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -44,6 +46,7 @@ fun SettingsRoute(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val activity = LocalContext.current as? Activity
     val snackbarHostState = remember { SnackbarHostState() }
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json")
@@ -69,7 +72,10 @@ fun SettingsRoute(
         onBack = onBack,
         onExport = { exportLauncher.launch("clockinpro-backup.json") },
         onImport = { importLauncher.launch(arrayOf("application/json")) },
-        onLanguageSelected = viewModel::setAppLanguage
+        onLanguageSelected = { language ->
+            viewModel.setAppLanguage(language)
+            activity?.recreate()
+        }
     )
 }
 
