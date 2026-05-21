@@ -38,16 +38,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.clockinpro.R
 import com.clockinpro.v2.domain.model.Target
 import com.clockinpro.v2.ui.components.TargetEditorDialog
 import com.clockinpro.v2.ui.components.colorForKey
+import com.clockinpro.v2.ui.components.currentAppLocale
 import com.clockinpro.v2.ui.components.iconForKey
 import com.clockinpro.v2.util.DateKeyUtils
+import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.format.TextStyle
 import kotlinx.coroutines.launch
 
 @Composable
@@ -77,8 +82,15 @@ fun TargetDetailRoute(
         if (showDeleteDialog) {
             AlertDialog(
                 onDismissRequest = { showDeleteDialog = false },
-                title = { Text("Delete target?") },
-                text = { Text("This removes ${target.name} and every saved completion for it.") },
+                title = { Text(stringResource(R.string.dialog_delete_target_title)) },
+                text = {
+                    Text(
+                        stringResource(
+                            R.string.dialog_delete_target_message_detail,
+                            target.name
+                        )
+                    )
+                },
                 confirmButton = {
                     TextButton(
                         onClick = {
@@ -89,12 +101,12 @@ fun TargetDetailRoute(
                             }
                         }
                     ) {
-                        Text("Delete")
+                        Text(stringResource(R.string.action_delete))
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { showDeleteDialog = false }) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.action_cancel))
                     }
                 }
             )
@@ -122,23 +134,26 @@ private fun TargetDetailScreen(
     onNextMonth: () -> Unit
 ) {
     val detail = uiState.detail
+    val locale = currentAppLocale()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(detail?.target?.name ?: "Target") },
+                title = {
+                    Text(detail?.target?.name ?: stringResource(R.string.target_detail_fallback_title))
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 actions = {
                     if (detail != null) {
                         IconButton(onClick = { onEdit(detail.target) }) {
-                            Icon(Icons.Default.Edit, contentDescription = "Edit")
+                            Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.action_edit))
                         }
                         IconButton(onClick = onDelete) {
-                            Icon(Icons.Default.Delete, contentDescription = "Delete")
+                            Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete))
                         }
                     }
                 }
@@ -152,7 +167,7 @@ private fun TargetDetailScreen(
                     .padding(paddingValues),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Target not found")
+                Text(stringResource(R.string.target_detail_not_found))
             }
         } else {
             Column(
@@ -169,12 +184,16 @@ private fun TargetDetailScreen(
                     total = detail.stats.totalCompletions
                 )
                 CalendarCard(
-                    monthLabel = uiState.monthLabel,
+                    monthLabel = DateKeyUtils.formatMonth(uiState.month, locale),
                     days = uiState.calendarDays,
+                    locale = locale,
                     onPreviousMonth = onPreviousMonth,
                     onNextMonth = onNextMonth
                 )
-                RecentCompletionsCard(completionDates = detail.completions.map { it.date })
+                RecentCompletionsCard(
+                    completionDates = detail.completions.map { it.date },
+                    locale = locale
+                )
             }
         }
     }
@@ -211,9 +230,12 @@ private fun IdentityCard(target: Target) {
                 )
                 Text(
                     text = if (target.reminder.enabled) {
-                        "Reminder ${DateKeyUtils.formatTime(target.reminder.hour, target.reminder.minute)}"
+                        stringResource(
+                            R.string.target_detail_reminder_at,
+                            DateKeyUtils.formatTime(target.reminder.hour, target.reminder.minute)
+                        )
                     } else {
-                        "No reminder configured"
+                        stringResource(R.string.target_detail_no_reminder)
                     },
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -233,12 +255,12 @@ private fun StatsCardRow(
     ) {
         StatTile(
             modifier = Modifier.weight(1f),
-            label = "Current streak",
+            label = stringResource(R.string.target_detail_current_streak),
             value = streak.toString()
         )
         StatTile(
             modifier = Modifier.weight(1f),
-            label = "Total completions",
+            label = stringResource(R.string.target_detail_total_completions),
             value = total.toString()
         )
     }
@@ -270,10 +292,21 @@ private fun StatTile(
 private fun CalendarCard(
     monthLabel: String,
     days: List<CalendarDayUiState>,
+    locale: java.util.Locale,
     onPreviousMonth: () -> Unit,
     onNextMonth: () -> Unit
 ) {
-    val weekdayLabels = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+    val weekdayLabels = listOf(
+        DayOfWeek.SUNDAY,
+        DayOfWeek.MONDAY,
+        DayOfWeek.TUESDAY,
+        DayOfWeek.WEDNESDAY,
+        DayOfWeek.THURSDAY,
+        DayOfWeek.FRIDAY,
+        DayOfWeek.SATURDAY
+    ).map { dayOfWeek ->
+        dayOfWeek.getDisplayName(TextStyle.SHORT, locale)
+    }
 
     Card {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -283,7 +316,10 @@ private fun CalendarCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onPreviousMonth) {
-                    Icon(Icons.Default.ChevronLeft, contentDescription = "Previous month")
+                    Icon(
+                        Icons.Default.ChevronLeft,
+                        contentDescription = stringResource(R.string.target_detail_previous_month)
+                    )
                 }
                 Text(
                     text = monthLabel,
@@ -291,7 +327,10 @@ private fun CalendarCard(
                     fontWeight = FontWeight.SemiBold
                 )
                 IconButton(onClick = onNextMonth) {
-                    Icon(Icons.Default.ChevronRight, contentDescription = "Next month")
+                    Icon(
+                        Icons.Default.ChevronRight,
+                        contentDescription = stringResource(R.string.target_detail_next_month)
+                    )
                 }
             }
 
@@ -367,25 +406,26 @@ private fun CalendarCell(
 
 @Composable
 private fun RecentCompletionsCard(
-    completionDates: List<LocalDate>
+    completionDates: List<LocalDate>,
+    locale: java.util.Locale
 ) {
     Card {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "Recent completions",
+                text = stringResource(R.string.target_detail_recent_completions),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
             if (completionDates.isEmpty()) {
                 Text(
-                    text = "No check-ins yet",
+                    text = stringResource(R.string.target_detail_no_completions),
                     modifier = Modifier.padding(top = 12.dp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             } else {
                 completionDates.sortedDescending().take(8).forEach { date ->
                     Text(
-                        text = DateKeyUtils.formatDate(date),
+                        text = DateKeyUtils.formatDate(date, locale),
                         modifier = Modifier.padding(top = 10.dp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

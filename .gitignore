@@ -31,6 +31,9 @@ local.properties
 # Keystore
 *.keystore
 *.jks
+keystore.properties
+release-keystore.jks
+release-keystore.keystore
 
 # Environment
 .env

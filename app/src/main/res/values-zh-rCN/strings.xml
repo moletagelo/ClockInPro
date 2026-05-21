@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ClockInPro</string>
+
+    <string name="action_back">返回</string>
+    <string name="action_settings">设置</string>
+    <string name="action_add_target">添加目标</string>
+    <string name="action_more">更多</string>
+    <string name="action_edit">编辑</string>
+    <string name="action_delete">删除</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_create">创建</string>
+    <string name="action_save">保存</string>
+    <string name="action_undo">撤销</string>
+    <string name="action_next">下一步</string>
+    <string name="action_start_using">开始使用 ClockInPro</string>
+    <string name="action_export_json_backup">导出 JSON 备份</string>
+    <string name="action_import_json_backup">导入 JSON 备份</string>
+
+    <string name="notification_channel_name">目标提醒</string>
+    <string name="notification_channel_description">为你的目标发送每日提醒通知</string>
+    <string name="notification_default_target_name">你的目标</string>
+    <string name="reminder_notification_title">该打卡了</string>
+    <string name="reminder_notification_body">继续保持，别忘了完成 %1$s。</string>
+
+    <string name="onboarding_title_account">无需账号，减少阻力</string>
+    <string name="onboarding_body_account">ClockInPro 现在会直接进入你的每日目标。默认所有数据都保存在设备本地。</string>
+    <string name="onboarding_title_targets">不止追踪工作</string>
+    <string name="onboarding_body_targets">你可以为阅读、锻炼、到岗，或任何想长期坚持的事情创建自定义目标。</string>
+    <string name="onboarding_title_momentum">轻点一下，保持节奏</string>
+    <string name="onboarding_body_momentum">只需轻点一次即可完成今日记录、累积连续天数，并随时通过本地 JSON 导出备份。</string>
+
+    <string name="home_empty_title">你的主页已经准备好了</string>
+    <string name="home_empty_body">创建第一个目标，一键开始记录。</string>
+    <string name="home_empty_cta">创建第一个目标</string>
+    <string name="home_marked_complete_message">%1$s 已标记为完成</string>
+    <string name="home_no_reminder">未设置提醒</string>
+    <string name="home_completed_today">今天已完成</string>
+    <string name="home_tap_to_complete">点击完成</string>
+    <string name="home_locked_in_today">今天已锁定完成</string>
+
+    <string name="dialog_delete_target_title">删除目标？</string>
+    <string name="dialog_delete_target_message_home">这会删除 %1$s 及其全部打卡历史。</string>
+    <string name="dialog_delete_target_message_detail">这会删除 %1$s 以及它的所有完成记录。</string>
+
+    <string name="target_editor_new_title">新建目标</string>
+    <string name="target_editor_edit_title">编辑目标</string>
+    <string name="target_editor_name_label">目标名称</string>
+    <string name="target_editor_icon_label">图标</string>
+    <string name="target_editor_color_label">颜色</string>
+    <string name="target_editor_daily_reminder_title">每日提醒</string>
+    <string name="target_editor_daily_reminder_body">为这个目标添加一个可选的本地通知提醒</string>
+    <string name="target_editor_reminder_time">提醒时间：%1$s</string>
+
+    <string name="target_detail_fallback_title">目标</string>
+    <string name="target_detail_not_found">未找到目标</string>
+    <string name="target_detail_reminder_at">提醒时间 %1$s</string>
+    <string name="target_detail_no_reminder">未配置提醒</string>
+    <string name="target_detail_current_streak">当前连续天数</string>
+    <string name="target_detail_total_completions">累计完成次数</string>
+    <string name="target_detail_recent_completions">最近完成记录</string>
+    <string name="target_detail_no_completions">还没有打卡记录</string>
+    <string name="target_detail_previous_month">上一月</string>
+    <string name="target_detail_next_month">下一月</string>
+
+    <string name="settings_title">设置</string>
+    <string name="settings_privacy_title">默认仅保存在本地</string>
+    <string name="settings_privacy_body">除非你手动导出 JSON 备份，否则目标和历史记录都会保存在这台设备上。</string>
+    <string name="settings_backup_title">备份与恢复</string>
+    <string name="settings_reminders_title">提醒</string>
+    <string name="settings_reminders_body">提醒按目标单独配置。在较新的 Android 版本上，你可能仍需授予通知权限。</string>
+    <string name="settings_language_title">语言</string>
+    <string name="settings_language_body">选择让 ClockInPro 跟随系统语言，或使用固定的应用语言。</string>
+    <string name="settings_language_system">跟随系统</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_language_simplified_chinese">简体中文</string>
+    <string name="settings_backup_exported">备份已导出</string>
+    <string name="settings_backup_imported">备份已导入</string>
+    <string name="settings_backup_export_failed">导出失败</string>
+    <string name="settings_backup_import_failed">导入失败</string>
+
+    <string name="target_icon_work">工作</string>
+    <string name="target_icon_read">阅读</string>
+    <string name="target_icon_fitness">健身</string>
+    <string name="target_icon_health">健康</string>
+    <string name="target_icon_routine">日常</string>
+    <string name="target_icon_general">通用</string>
+
+    <string name="target_color_ocean">海洋</string>
+    <string name="target_color_sunrise">日出</string>
+    <string name="target_color_forest">森林</string>
+    <string name="target_color_berry">莓果</string>
+    <string name="target_color_slate">石板</string>
+    <string name="target_color_gold">金色</string>
+</resources>

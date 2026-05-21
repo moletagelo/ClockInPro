@@ -4,8 +4,10 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
+import com.clockinpro.util.AppLanguage
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -36,6 +38,10 @@ class PreferencesManager @Inject constructor(
 
     val hasCompletedOnboarding: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[KEY_HAS_COMPLETED_ONBOARDING] ?: false
+    }
+
+    val appLanguage: Flow<AppLanguage> = dataStore.data.map { preferences ->
+        AppLanguage.fromStorageValue(preferences[KEY_APP_LANGUAGE])
     }
 
     val lastSyncTime: Flow<Long> = dataStore.data.map { preferences ->
@@ -70,6 +76,14 @@ class PreferencesManager @Inject constructor(
         }
     }
 
+    suspend fun setAppLanguage(language: AppLanguage) {
+        dataStore.edit { preferences ->
+            preferences[KEY_APP_LANGUAGE] = language.storageValue
+        }
+    }
+
+    suspend fun getAppLanguage(): AppLanguage = appLanguage.first()
+
     suspend fun setLastSyncTime(time: Long) {
         dataStore.edit { preferences ->
             preferences[KEY_LAST_SYNC_TIME] = time
@@ -100,5 +114,6 @@ class PreferencesManager @Inject constructor(
         private val KEY_DARK_MODE = booleanPreferencesKey("dark_mode")
         private val KEY_LAST_SYNC_TIME = longPreferencesKey("last_sync_time")
         private val KEY_HAS_COMPLETED_ONBOARDING = booleanPreferencesKey("has_completed_onboarding")
+        private val KEY_APP_LANGUAGE = stringPreferencesKey("app_language")
     }
 }

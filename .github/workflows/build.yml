@@ -26,6 +26,25 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
+      - name: Prepare release signing
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          test -n "$ANDROID_KEYSTORE_BASE64"
+          test -n "$ANDROID_KEY_ALIAS"
+          test -n "$ANDROID_KEYSTORE_PASSWORD"
+          test -n "$ANDROID_KEY_PASSWORD"
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > release-keystore.jks
+          cat > keystore.properties <<EOF
+          storeFile=release-keystore.jks
+          storePassword=$ANDROID_KEYSTORE_PASSWORD
+          keyAlias=$ANDROID_KEY_ALIAS
+          keyPassword=$ANDROID_KEY_PASSWORD
+          EOF
+
       - name: Read app version
         run: |
           VERSION_NAME=$(grep -m1 'versionName "' app/build.gradle | sed -E 's/.*versionName "([^"]+)".*/\1/')
@@ -34,16 +53,16 @@ jobs:
           echo "VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
           echo "RELEASE_TAG=v$VERSION_NAME" >> "$GITHUB_ENV"
 
-      - name: Build Debug APK
+      - name: Build Release APK
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleRelease --no-daemon
 
       - name: Upload APK to Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ClockInPro-v${{ env.VERSION_NAME }}-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: ClockInPro-v${{ env.VERSION_NAME }}-release
+          path: app/build/outputs/apk/release/app-release.apk
 
       - name: Delete existing release if exists
         uses: dev-drprasad/delete-tag-and-release@v1.0
@@ -57,7 +76,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: app/build/outputs/apk/debug/app-debug.apk
+          files: app/build/outputs/apk/release/app-release.apk
           tag_name: ${{ env.RELEASE_TAG }}
           name: ClockInPro v${{ env.VERSION_NAME }}
           body: |
@@ -68,7 +87,7 @@ jobs:
             - Version name: `${{ env.VERSION_NAME }}`
             - Version code: `${{ env.VERSION_CODE }}`
             - Commit: `${{ github.sha }}`
-            - APK: `app-debug.apk`
+            - APK: `app-release.apk`
           draft: false
           prerelease: false
           generate_release_notes: true

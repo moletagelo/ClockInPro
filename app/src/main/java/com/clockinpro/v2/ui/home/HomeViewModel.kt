@@ -6,7 +6,6 @@ import com.clockinpro.v2.data.repository.TargetRepository
 import com.clockinpro.v2.domain.model.SaveTargetRequest
 import com.clockinpro.v2.domain.model.TargetSummary
 import com.clockinpro.v2.reminder.TargetReminderScheduler
-import com.clockinpro.v2.util.DateKeyUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import javax.inject.Inject
@@ -16,7 +15,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 data class HomeUiState(
-    val todayLabel: String = "",
+    val today: LocalDate = LocalDate.now(),
     val targets: List<TargetSummary> = emptyList()
 )
 
@@ -28,14 +27,14 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = repository.observeTargetSummaries()
         .map { targets ->
             HomeUiState(
-                todayLabel = DateKeyUtils.formatDate(LocalDate.now()),
+                today = LocalDate.now(),
                 targets = targets
             )
         }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = HomeUiState(todayLabel = DateKeyUtils.formatDate(LocalDate.now()))
+            initialValue = HomeUiState(today = LocalDate.now())
         )
 
     suspend fun saveTarget(request: SaveTargetRequest) {

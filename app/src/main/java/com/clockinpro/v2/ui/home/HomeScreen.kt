@@ -50,10 +50,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.clockinpro.R
 import com.clockinpro.v2.domain.model.Target
 import com.clockinpro.v2.domain.model.TargetSummary
+import com.clockinpro.v2.ui.components.currentAppLocale
 import com.clockinpro.v2.ui.components.TargetEditorDialog
 import com.clockinpro.v2.ui.components.colorForKey
 import com.clockinpro.v2.ui.components.iconForKey
@@ -69,6 +73,7 @@ fun HomeRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
+    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     var editingTarget by remember { mutableStateOf<Target?>(null) }
     var showCreateDialog by remember { mutableStateOf(false) }
@@ -94,8 +99,15 @@ fun HomeRoute(
     deleteTarget?.let { target ->
         androidx.compose.material3.AlertDialog(
             onDismissRequest = { deleteTarget = null },
-            title = { Text("Delete target?") },
-            text = { Text("This removes ${target.name} and all of its check-in history.") },
+            title = { Text(stringResource(R.string.dialog_delete_target_title)) },
+            text = {
+                Text(
+                    stringResource(
+                        R.string.dialog_delete_target_message_home,
+                        target.name
+                    )
+                )
+            },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -105,12 +117,12 @@ fun HomeRoute(
                         }
                     }
                 ) {
-                    Text("Delete")
+                    Text(stringResource(R.string.action_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { deleteTarget = null }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.action_cancel))
                 }
             }
         )
@@ -130,8 +142,11 @@ fun HomeRoute(
                 if (completed) {
                     haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                     val result = snackbarHostState.showSnackbar(
-                        message = "${summary.target.name} marked complete",
-                        actionLabel = "Undo",
+                        message = context.getString(
+                            R.string.home_marked_complete_message,
+                            summary.target.name
+                        ),
+                        actionLabel = context.getString(R.string.action_undo),
                         duration = SnackbarDuration.Short
                     )
                     if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) {
@@ -155,14 +170,15 @@ private fun HomeScreen(
     onOpenTarget: (Long) -> Unit,
     onCompleteTarget: (TargetSummary) -> Unit
 ) {
+    val locale = currentAppLocale()
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Column {
-                        Text("ClockInPro")
+                        Text(stringResource(R.string.app_name))
                         Text(
-                            text = uiState.todayLabel,
+                            text = DateKeyUtils.formatDate(uiState.today, locale),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -170,7 +186,7 @@ private fun HomeScreen(
                 },
                 actions = {
                     IconButton(onClick = onOpenSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = "Settings")
+                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.action_settings))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -180,7 +196,7 @@ private fun HomeScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddTarget) {
-                Icon(Icons.Default.Add, contentDescription = "Add target")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.action_add_target))
             }
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
@@ -232,16 +248,16 @@ private fun EmptyHomeState(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = "Your dashboard is ready",
+                    text = stringResource(R.string.home_empty_title),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Create your first target and start tracking with one tap.",
+                    text = stringResource(R.string.home_empty_body),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 TextButton(onClick = onAddTarget) {
-                    Text("Create first target")
+                    Text(stringResource(R.string.home_empty_cta))
                 }
             }
         }
@@ -292,21 +308,21 @@ private fun TargetCard(
                     onClick = { menuExpanded = true },
                     modifier = Modifier.align(Alignment.TopEnd)
                 ) {
-                    Icon(Icons.Default.MoreVert, contentDescription = "More")
+                    Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.action_more))
                 }
                 DropdownMenu(
                     expanded = menuExpanded,
                     onDismissRequest = { menuExpanded = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Edit") },
+                        text = { Text(stringResource(R.string.action_edit)) },
                         onClick = {
                             menuExpanded = false
                             onEdit()
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("Delete") },
+                        text = { Text(stringResource(R.string.action_delete)) },
                         onClick = {
                             menuExpanded = false
                             onDelete()
@@ -323,9 +339,15 @@ private fun TargetCard(
                 )
                 Text(
                     text = if (summary.target.reminder.enabled) {
-                        "Reminder ${DateKeyUtils.formatTime(summary.target.reminder.hour, summary.target.reminder.minute)}"
+                        stringResource(
+                            R.string.target_detail_reminder_at,
+                            DateKeyUtils.formatTime(
+                                summary.target.reminder.hour,
+                                summary.target.reminder.minute
+                            )
+                        )
                     } else {
-                        "No reminder"
+                        stringResource(R.string.home_no_reminder)
                     },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -342,14 +364,18 @@ private fun TargetCard(
                     contentDescription = null
                 )
                 Text(
-                    text = if (summary.isCompletedToday) "Completed today" else "Tap to complete",
+                    text = if (summary.isCompletedToday) {
+                        stringResource(R.string.home_completed_today)
+                    } else {
+                        stringResource(R.string.home_tap_to_complete)
+                    },
                     modifier = Modifier.padding(start = 8.dp)
                 )
             }
 
             AnimatedVisibility(visible = summary.isCompletedToday) {
                 Text(
-                    text = "Locked in for today",
+                    text = stringResource(R.string.home_locked_in_today),
                     style = MaterialTheme.typography.bodySmall,
                     color = accent,
                     fontWeight = FontWeight.Medium

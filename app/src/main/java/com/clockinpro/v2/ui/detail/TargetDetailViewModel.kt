@@ -7,7 +7,6 @@ import com.clockinpro.v2.data.repository.TargetRepository
 import com.clockinpro.v2.domain.model.SaveTargetRequest
 import com.clockinpro.v2.domain.model.TargetDetail
 import com.clockinpro.v2.reminder.TargetReminderScheduler
-import com.clockinpro.v2.util.DateKeyUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import java.time.YearMonth
@@ -27,7 +26,7 @@ data class CalendarDayUiState(
 
 data class TargetDetailUiState(
     val detail: TargetDetail? = null,
-    val monthLabel: String = "",
+    val month: YearMonth = YearMonth.now(),
     val calendarDays: List<CalendarDayUiState> = emptyList()
 )
 
@@ -46,13 +45,13 @@ class TargetDetailViewModel @Inject constructor(
     ) { detail, month ->
         TargetDetailUiState(
             detail = detail,
-            monthLabel = DateKeyUtils.formatMonth(month),
+            month = month,
             calendarDays = detail?.let { buildCalendarDays(month, it) }.orEmpty()
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = TargetDetailUiState(monthLabel = DateKeyUtils.formatMonth(YearMonth.now()))
+        initialValue = TargetDetailUiState(month = YearMonth.now())
     )
 
     fun showPreviousMonth() {

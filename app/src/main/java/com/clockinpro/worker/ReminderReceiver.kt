@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.clockinpro.ClockInApp
+import com.clockinpro.R
 import com.clockinpro.ui.MainActivity
 
 class ReminderReceiver : BroadcastReceiver() {
@@ -15,7 +16,8 @@ class ReminderReceiver : BroadcastReceiver() {
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val targetId = intent.getLongExtra(EXTRA_TARGET_ID, NOTIFICATION_ID.toLong())
-        val targetName = intent.getStringExtra(EXTRA_TARGET_NAME) ?: "your target"
+        val targetName = intent.getStringExtra(EXTRA_TARGET_NAME)
+            ?: context.getString(R.string.notification_default_target_name)
 
         val activityIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -30,8 +32,8 @@ class ReminderReceiver : BroadcastReceiver() {
 
         val notification = NotificationCompat.Builder(context, ClockInApp.REMINDER_CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_popup_reminder)
-            .setContentTitle("Time to check in")
-            .setContentText("Keep your momentum going for $targetName.")
+            .setContentTitle(context.getString(R.string.reminder_notification_title))
+            .setContentText(context.getString(R.string.reminder_notification_body, targetName))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)

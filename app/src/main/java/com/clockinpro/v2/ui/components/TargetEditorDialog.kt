@@ -1,9 +1,9 @@
 package com.clockinpro.v2.ui.components
 
 import android.app.TimePickerDialog
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,9 +30,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import com.clockinpro.R
 import com.clockinpro.v2.domain.model.ReminderConfig
 import com.clockinpro.v2.domain.model.SaveTargetRequest
 import com.clockinpro.v2.domain.model.Target
@@ -46,6 +48,8 @@ fun TargetEditorDialog(
     onConfirm: (SaveTargetRequest) -> Unit
 ) {
     val context = LocalContext.current
+    val titleRes = if (initialTarget == null) R.string.target_editor_new_title else R.string.target_editor_edit_title
+    val confirmRes = if (initialTarget == null) R.string.action_create else R.string.action_save
     var name by remember(initialTarget?.id) { mutableStateOf(initialTarget?.name.orEmpty()) }
     var selectedIconKey by remember(initialTarget?.id) {
         mutableStateOf(initialTarget?.iconKey ?: targetIconOptions.first().key)
@@ -66,7 +70,7 @@ fun TargetEditorDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(if (initialTarget == null) "New target" else "Edit target")
+            Text(stringResource(titleRes))
         },
         text = {
             Column(
@@ -77,14 +81,14 @@ fun TargetEditorDialog(
                     value = name,
                     onValueChange = { name = it },
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Target name") },
+                    label = { Text(stringResource(R.string.target_editor_name_label)) },
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                     singleLine = true
                 )
 
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = "Icon",
+                        text = stringResource(R.string.target_editor_icon_label),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -96,7 +100,7 @@ fun TargetEditorDialog(
                             FilterChip(
                                 selected = selectedIconKey == option.key,
                                 onClick = { selectedIconKey = option.key },
-                                label = { Text(option.label) },
+                                label = { Text(stringResource(option.labelRes)) },
                                 leadingIcon = {
                                     androidx.compose.material3.Icon(
                                         imageVector = option.icon,
@@ -111,7 +115,7 @@ fun TargetEditorDialog(
 
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = "Color",
+                        text = stringResource(R.string.target_editor_color_label),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -123,7 +127,7 @@ fun TargetEditorDialog(
                             FilterChip(
                                 selected = selectedColorKey == option.key,
                                 onClick = { selectedColorKey = option.key },
-                                label = { Text(option.label) },
+                                label = { Text(stringResource(option.labelRes)) },
                                 leadingIcon = {
                                     ColorSwatch(color = option.color)
                                 }
@@ -140,12 +144,12 @@ fun TargetEditorDialog(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Daily reminder",
+                                text = stringResource(R.string.target_editor_daily_reminder_title),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.SemiBold
                             )
                             Text(
-                                text = "Optional local notification for this target",
+                                text = stringResource(R.string.target_editor_daily_reminder_body),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -171,7 +175,12 @@ fun TargetEditorDialog(
                                 ).show()
                             }
                         ) {
-                            Text("Reminder time: ${DateKeyUtils.formatTime(reminderHour, reminderMinute)}")
+                            Text(
+                                stringResource(
+                                    R.string.target_editor_reminder_time,
+                                    DateKeyUtils.formatTime(reminderHour, reminderMinute)
+                                )
+                            )
                         }
                     }
                 }
@@ -196,12 +205,12 @@ fun TargetEditorDialog(
                     )
                 }
             ) {
-                Text(if (initialTarget == null) "Create" else "Save")
+                Text(stringResource(confirmRes))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )

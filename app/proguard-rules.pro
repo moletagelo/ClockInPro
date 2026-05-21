@@ -20,6 +20,10 @@
 
 # Keep Room entities
 -keep class com.clockinpro.data.local.** { *; }
+-keep class com.clockinpro.v2.data.local.** { *; }
+
+# Keep backup payloads serialized by Gson
+-keep class com.clockinpro.v2.data.backup.** { *; }
 
 # Keep Hilt
 -keep class dagger.hilt.** { *; }

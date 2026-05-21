@@ -30,16 +30,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.clockinpro.R
 import kotlinx.coroutines.launch
 
 private data class OnboardingPage(
-    val title: String,
-    val body: String,
+    val titleRes: Int,
+    val bodyRes: Int,
     val icon: ImageVector,
     val accent: Color
 )
@@ -67,20 +69,20 @@ private fun OnboardingScreen(
 ) {
     val pages = listOf(
         OnboardingPage(
-            title = "No account, no friction",
-            body = "ClockInPro now opens straight into your day. Everything stays on your device by default.",
+            titleRes = R.string.onboarding_title_account,
+            bodyRes = R.string.onboarding_body_account,
             icon = Icons.Default.Lock,
             accent = Color(0xFF227C70)
         ),
         OnboardingPage(
-            title = "Track more than work",
-            body = "Create custom targets for reading, workouts, office arrival, or anything else you want to keep consistent.",
+            titleRes = R.string.onboarding_title_targets,
+            bodyRes = R.string.onboarding_body_targets,
             icon = Icons.Default.Bolt,
             accent = Color(0xFFEF8354)
         ),
         OnboardingPage(
-            title = "Tap fast, keep momentum",
-            body = "One tap marks today complete, builds streaks, and stays backed up with local JSON export whenever you want.",
+            titleRes = R.string.onboarding_title_momentum,
+            bodyRes = R.string.onboarding_body_momentum,
             icon = Icons.Default.AutoGraph,
             accent = Color(0xFF4F5D75)
         )
@@ -124,7 +126,7 @@ private fun OnboardingScreen(
                     }
 
                     Text(
-                        text = item.title,
+                        text = stringResource(item.titleRes),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
@@ -132,7 +134,7 @@ private fun OnboardingScreen(
                     )
 
                     Text(
-                        text = item.body,
+                        text = stringResource(item.bodyRes),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
@@ -177,7 +179,13 @@ private fun OnboardingScreen(
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(if (pagerState.currentPage == pages.lastIndex) "Start using ClockInPro" else "Next")
+                    Text(
+                        if (pagerState.currentPage == pages.lastIndex) {
+                            stringResource(R.string.action_start_using)
+                        } else {
+                            stringResource(R.string.action_next)
+                        }
+                    )
                 }
             }
         }
