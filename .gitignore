@@ -38,3 +38,9 @@ release-keystore.keystore
 # Environment
 .env
 .env.local
+
+# Local docs and artifacts
+build-output.zip
+SPEC.md
+spec.md
+docs/
